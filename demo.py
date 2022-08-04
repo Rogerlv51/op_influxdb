@@ -1,9 +1,9 @@
 # from influxdb import InfluxDBClient
 
-from operator import index
 import influxdb_client
 import pandas as pd
 import numpy as np
+import pytz
 
 bucket = "standard"
 org = "unianalysis"
@@ -24,15 +24,16 @@ df6 = pd.concat([df5, df3, df4], axis=1)
 print(df6)
 df6.to_csv("test.csv", index=None)
 '''
-
-ts = pd.date_range('2012-01-01 00:00:01', freq='1H', periods=26304)
+#tz = pytz.timezone('Asia/Shanghai')   统一用中国时区表示
+ts = pd.date_range('2012-01-01 00:00:01', freq='1H', periods=26304, tz="Asia/Shanghai")
 #ts = pd.Series(ts)
+print(ts)
 ts = np.tile(ts, 321)   # 复制所有时间列，对应到不同的custom
 ts = pd.Series(ts)
 
 df = pd.read_csv("test.csv",index_col=None)
 # print(df)
-df = df.T
+df = df.T           # 原本的数据一条是以行的形式，先转换成列
 df_1 = df.iloc[0:-1,:]
 
 list = []
@@ -40,18 +41,20 @@ for item in range(321):
     temp = "T" + str(item+1)
     list.append(temp)
 
-df_1.columns = list
+df_1.columns = list          # 添加custom列，作为数据表的tag
 
 # print(df_1)
-df_2 = df_1.melt(var_name="custom", value_name="elec_load")
-df_3 = pd.concat([ts, df_2], axis=1)
-df_3.rename(columns={0: "datetime"}, inplace=True)
-df_3.rename(columns={"elec_load": "_value"}, inplace=True)
-list2 = []
-str = "ele_load"
-for item in range(8443584):
-    list2.append(str)
-df_3["_field"] = list2
+df_2 = df_1.melt(var_name="custom", value_name="ele_load")
+df_2.index = ts
+# df_3 = pd.concat([ts, df_2], axis=1)
+# df_3.rename(columns={0: "datetime"}, inplace=True)
+#df_3.rename(columns={"elec_load": "_value"}, inplace=True)
+#list2 = []
+#str = "ele_load"
+#for item in range(8443584):
+    #list2.append(str)
+#df_3["_field"] = list2
 # df_3.to_csv("final.csv", index=None)
-df_3.to_csv("final.csv", index=None)
-print(df_3)
+# df_3.to_csv("final.csv", index=None)
+df_2["ele_load"] = df_2["ele_load"].astype('float')   # 这里注意转换类型为float因为原始为string
+print(df_2["ele_load"])
