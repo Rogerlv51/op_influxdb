@@ -10,9 +10,9 @@ delete_api = client.delete_api()
 """
 Delete Data
 """
-start = "1970-01-01T00:00:00Z"
-stop = "2021-02-01T00:00:00Z"
-delete_api.delete(start, stop, '_measurement="uci_electricity"', bucket='standard', org=org)
+start = "1690-01-01T00:00:00Z"
+stop = "2022-08-05T00:00:00Z"
+delete_api.delete(start, stop, '_measurement="tourism_all"', bucket='standard', org=org)
 
 """
 Close client
