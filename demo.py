@@ -57,4 +57,5 @@ df_2.index = ts
 # df_3.to_csv("final.csv", index=None)
 # df_3.to_csv("final.csv", index=None)
 df_2["ele_load"] = df_2["ele_load"].astype('float')   # 这里注意转换类型为float因为原始为string
+df_2.to_csv("uci.csv")
 print(df_2["ele_load"])
