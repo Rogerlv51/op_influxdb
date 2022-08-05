@@ -9,4 +9,4 @@ import pandas as pd
 import numpy as np
 
 data = pd.read_csv("tourism.csv")
-print(data.info)
+print(data[data['landscape']=='m1'])
