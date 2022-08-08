@@ -12,10 +12,11 @@ import numpy as np
 data = pd.read_csv("toursim_final.csv")
 df_1 = data.iloc[139624:,:]
 df_1.index = df_1['time']
+df_1.to_csv('tourism_year.csv', index=None)
 print(df_1)
 
 
-
+'''
 with InfluxDBClient(url=url, token=token, org=org) as _client:
 
     with _client.write_api(write_options=WriteOptions(batch_size=1000,
@@ -33,3 +34,4 @@ with InfluxDBClient(url=url, token=token, org=org) as _client:
 
         _write_client.write("standard", "unianalysis", record=df_1, data_frame_measurement_name='tourism_year',
                             data_frame_tag_columns=['landscape'])
+'''
