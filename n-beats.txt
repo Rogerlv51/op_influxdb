@@ -1,0 +1,72 @@
+1、在n-beats参数中general模型默认num_stack=1和num_block=3
+      可解释性模型默认num_stack = 2 和num_block=3意思是每一个stack中有3个block，因为写程序的时候复制了num_block的值分别赋给每一个stack，这个可以调下参数看看效果有什么不一样
+      算法默认参数：
+	num_stack: int = 1,
+        	num_block: int = 3,
+        	width: int = 8,  # [2**8]
+        	expansion_coe: int = 5,  # [3,7]
+       	num_block_layer: int = 4,
+        	prediction_length: int = 0,
+        	context_length: int = 0,
+        	dropout: float = 0.1,
+       	backcast_loss_ratio: float = 0.1
+
+	参数选择里面lookforward是规定预测步长的，通常lookback和lookforward设置成一样的吧
+	early stop patience: 当early stop被激活(如发现 loss 相比上一个 epoch 训练没有下降)，则经过 patience 个 epoch 后停止训练
+
+
+2、添加数据集：
+过滤条件：_measurement    过滤值：填写数据集名称
+
+
+
+
+3、平台一些问题记录：
+
+	感觉训练图表显示不清晰，底下是不是应该标明是一个batch的loss，横轴一直在衰减是啥意思？     解决
+	训练日志能否实时打印？     解决
+	感觉用户在使用指标的时候，是不是可以显示一下error最小的epoch？
+	无法添加划分（平台那边bug太多了）
+	现在好像添加划分时灵时不灵？不清楚什么原因，422报错不太影响
+
+
+
+4、数据集和测试说明：
+Test_UCI_Nbeats_01 = uci_electricity
+===== Final Result =====
+{
+  "RMSE": 490.6979935085667,
+  "SMAPE": 44.12858088811238,
+  "MAE": 148.0460408528646
+}
+Test_UCI_Nbeats_02 = uci_electricity，预测步长变为10，batch-size增大到256，略有提升（SMAPE指标）
+===== Final Result =====
+{
+  "RMSE": 752.4420243447331,
+  "SMAPE": 43.354058265686035,
+  "MAE": 187.12445068359375
+}
+Test_UCI_Nbeats_03 = uci_electricity，预测步长变为10，batch-size增大到256，增加一个stack，性能好像略有提升
+Using device cuda
+===== Final Result =====
+{
+  "RMSE": 672.6984837206043,
+  "SMAPE": 40.37838578224182,
+  "MAE": 168.6480255126953
+}
+
+
+5、算法在UCI_electricity上表现较差，370个分组，但是用ETT的数据只有两个分组时表现良好
+在nbeats论文中聚合方式为sum，采样频率为一个小时，不知道是因为分组较多还是采样频率的问题导致性能不好？
+初步的结论是，分组较少的时候效果应该会好一点，还有就是不同的分组预测的情况不太一致，有的好有的坏
+
+
+分析一下效果比较差的原因：可能是由于这个电力数据有很多用户的数据显得比较诡异，有些时候有突变值，算法可能没法很好的拟合曲线
+还有就是nbeats的论文里面作者他们的stack堆了很多，然后batch也很大，迭代次数很多，每一层的宽度很大，不知道有没有影响
+
+
+添加划分的时候为什么数据集比例划分出来的结果和设置的比例不一致？（已放弃debug）
+还有一个问题是，一旦数据超过2022年当前的时间点，貌似会自动丢失？不知道是不是平台设计的问题
+
+
+创建实验的时候选择的预测步长和界面显示不一致
